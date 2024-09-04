@@ -1,0 +1,13 @@
+.posts{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.post {
+  background: #dcdcdc;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 10px;
+}
