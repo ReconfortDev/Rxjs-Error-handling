@@ -4,6 +4,10 @@
 
 This Angular application demonstrates error handling, retry logic, and asynchronous data fetching with RxJS. It simulates fetching posts from a remote API, handling different error scenarios, and displaying posts or error messages based on the outcome.
 
+## Live link
+[🌐Error handling live link](https://singular-donut-20c521.netlify.app/)
+
+
 ## Features
 
 - **Simulated Data Fetching**: Fetch posts from a simulated endpoint.
