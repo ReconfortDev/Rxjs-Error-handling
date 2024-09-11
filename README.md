@@ -77,16 +77,8 @@ The application simulates data fetching with a random outcome. Possible response
   - **app.component.html**: The template for displaying posts and error messages.
   - **app.component.css**: The styles for the main component.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Acknowledgments
 
 - [Angular](https://angular.io/)
 - [RxJS](https://rxjs.dev/)
 - [JSONPlaceholder](https://jsonplaceholder.typicode.com/)
-
----
-
-Feel free to adjust the content based on the specifics of your project. If there are additional setup steps or configuration details, make sure to include those as well.
