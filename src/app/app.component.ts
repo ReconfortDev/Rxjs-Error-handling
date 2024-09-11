@@ -1,109 +1,79 @@
-import {HttpClient} from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {Post} from "../components/models";
-import {catchError, delayWhen, map, of, retryWhen, shareReplay, tap, throwError, timer} from "rxjs";
-import {AsyncPipe, NgForOf} from "@angular/common";
+import { Component, OnInit } from '@angular/core';
+import { Post } from '../components/models';
+import { catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { PostServiceService } from "../service/post-service.service";
+import { RouterOutlet } from "@angular/router";
+import { AsyncPipe, NgForOf, NgIf } from "@angular/common";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, NgForOf, AsyncPipe],
+  imports: [RouterOutlet, NgForOf, AsyncPipe, NgIf],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   title = 'rxjsErrorHandling';
   posts: Post[] = [];
+  loading = false;
+  errorMessage = '';
+  retryCount = 0;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private postService: PostServiceService) {}
 
-  ngOnInit() {
-    const https$ = this.http.get<Post[]>('https://jsonplaceholder.typicode.com/posts');
+  ngOnInit() {}
 
-    // RxJs subscribe and error callbacks
-    https$.subscribe(
-      res => {
-        console.log(res);
-        this.posts = res;
+  getPost(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.posts = [];
+    this.retryCount = 0;
+
+    this.postService.getSimulatedPosts().pipe(
+      tap({
+        next: () => {
+          this.loading = false;
+          this.errorMessage = '';
+        },
+        error: () => {
+          this.retryCount++;
+        }
+      }),
+      catchError(err => {
+        this.loading = false;
+        if (err.status) {
+          switch (err.status) {
+            case 404:
+              this.errorMessage = 'Resource not found (404). Please check the URL.';
+              break;
+            case 500:
+              this.errorMessage = 'Server error (500). Please try again later.';
+              break;
+            default:
+              this.errorMessage = `An error occurred: ${err.message}`;
+              break;
+          }
+        } else {
+          this.errorMessage = 'An unexpected error occurred.';
+        }
+        return of([]);
+      })
+    ).subscribe(
+      (res: Post[]) => {
+        if (res.length > 0) {
+          this.posts = res;
+        } else {
+          this.errorMessage = 'No posts available.';
+        }
       },
-      error => console.log(error),
-      () => console.log('Completed')
-    )
-
-
-
-    // The catchError Operator
-
-    // https$.pipe(
-    //   catchError(err => of([])),
-    // ).subscribe(
-    //   res => console.log('HTTP response', res),
-    //   err => console.log('HTTP Error', err),
-    //   () => console.log('HTTP request completed.')
-    // )
-
-
-
-
-
-    // The Catch and Rethrow Strategy
-
-    // https$.pipe(
-    //   catchError(err => {
-    //     console.log('Handling error locally an rethrowing it ...', err)
-    //     return throwError(err)
-    //   }),
-    // ).subscribe(
-    //   res => console.log('HTTP response', res),
-    //   err => console.log('HTTP Error', err),
-    //   () => console.log('HTTP request completed.')
-    // )
-
-
-
-
-
-    // Immediate Retry Strategy
-
-    // https$.pipe(
-    //   tap(() => console.log("HTTP request executed")),
-    //   map(res => Object.values(res)),
-    //   shareReplay(),
-    //   retryWhen(errors => {
-    //     return errors
-    //       .pipe(
-    //         tap(() => console.log('retrying...'))
-    //       );
-    //   })
-    // ).subscribe(
-    //   res => console.log('HTTP response', res),
-    //   err => console.log('HTTP Error', err),
-    //   () => console.log('HTTP request completed.')
-    // );
-
-
-
-
-
-    // Delayed Retry Strategy implementation
-
-    // https$.pipe(
-    //   tap(() => console.log("HTTP request executed")),
-    //   map((res: any) => Object.values(res)),
-    //   shareReplay(),
-    //   retryWhen(errors => {
-    //     return errors
-    //       .pipe(
-    //         delayWhen(() => timer(2000)),
-    //         tap(() => console.log('retrying...'))
-    //       );
-    //   })
-    // ).subscribe(
-    //   (res: any) => console.log('HTTP response', res),
-    //   (err: any) => console.log('HTTP Error', err),
-    //   () => console.log('HTTP request completed.')
-    // );
+      (err) => {
+        this.errorMessage = 'An error occurred while fetching posts.';
+        console.log('HTTP Error:', err);
+      },
+      () => {
+        console.log('HTTP request completed.');
+      }
+    );
   }
 }

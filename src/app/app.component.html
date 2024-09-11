@@ -1,8 +1,22 @@
 <div class="posts">
-  <div *ngFor="let item of posts " class="post">
+  <button (click)="getPost()" class="button">Get Post</button>
+
+  <!-- Display loading indicator while fetching posts -->
+  <div *ngIf="loading">Loading...</div>
+
+  <!-- Display retry message if retryCount > 0 -->
+  <div *ngIf="retryCount > 0" class="retry-message">
+    Retrying... ({{ retryCount }} attempt{{ retryCount > 1 ? 's' : '' }})
+  </div>
+
+  <!-- Display error message if any -->
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <!-- Display posts when available -->
+  <div *ngFor="let item of posts" class="post">
     <p>UserId: {{ item.userId }}</p>
-    <p>Id:{{ item.id }}</p>
-    <p>Title:{{ item.title }}</p>
-    <p>Body:{{ item.body }}</p>
+    <p>Id: {{ item.id }}</p>
+    <p>Title: {{ item.title }}</p>
+    <p>Body: {{ item.body }}</p>
   </div>
 </div>
